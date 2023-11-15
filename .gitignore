@@ -1,0 +1,7 @@
+__pycache__/
+weights/
+basicsr/
+facelib/
+flagged/
+output/
+weights/
