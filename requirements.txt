@@ -1,0 +1,17 @@
+addict
+future
+lmdb
+numpy
+opencv-python
+Pillow
+pyyaml
+requests
+cuda-python
+scikit-image
+scipy
+tb-nightly
+torchvision
+tqdm
+yapf
+lpips
+gdown
