@@ -167,20 +167,16 @@ title = "Unblur App"
 # Gradio Interface
 iface = gr.Interface(
     inference, [
-    gr.inputs.Image(type="filepath", label="Input"),
-    gr.inputs.Checkbox(default=True, label="Background_Enhance"),
-    gr.inputs.Checkbox(default=True, label="Face_Upsample"),
-    gr.inputs.Number(default=2, label="Rescaling_Factor (up to 4)"),
+    gr.Image(type="filepath", label="Input"),
+    gr.Checkbox(label="Background_Enhance"),
+    gr.Checkbox(label="Face_Upsample"),
+    gr.Number(label="Rescaling_Factor (up to 4)"),
     gr.Slider(0, 1, value=0.7, step=0.01, label='Fidelity (0 for better quality, 1 for better identity)')
     ], [
-    gr.outputs.Image(type="numpy", label="Output"),
+    gr.Image(type="numpy", label="Output"),
     ],
     live=True,
-    live_server=True,
-    share=True,
-    api_open=True,
     title=title,
-    
 )
 
 iface.launch()

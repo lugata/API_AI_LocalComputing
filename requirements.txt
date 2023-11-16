@@ -15,3 +15,10 @@ tqdm
 yapf
 lpips
 gdown
+flask
+opencv-python
+gradio
+gradio_client
+torch
+torchvision
+PIL
