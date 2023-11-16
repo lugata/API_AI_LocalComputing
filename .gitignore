@@ -6,5 +6,5 @@ flagged/
 output/
 weights/
 .DS_Store
-
+.venv/
 
