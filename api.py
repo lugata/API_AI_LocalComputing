@@ -1,10 +1,17 @@
+import base64
 from flask import Flask, request, jsonify, send_file
 from gradio_client import Client
 import os
 import shutil
 from datetime import datetime
+import firebase_admin
+from firebase_admin import credentials, storage
 
 app = Flask(__name__)
+
+# Initialize Firebase
+cred = credentials.Certificate("path/to/your/firebase-credentials.json")
+firebase_admin.initialize_app(cred, {'storageBucket': 'your-firebase-storage-bucket'})
 
 IpAddress = "192.168.2.51"
 Port = 8080
@@ -14,7 +21,6 @@ output_directory = "output"
 
 @app.route('/predict', methods=['POST'])
 def predict():
-
     # Parse parameters from JSON payload
     data = request.get_json()
 
@@ -46,11 +52,20 @@ def predict():
             current_datetime = datetime.now().strftime("%Y%m%d%H%M%S")
             new_filename = f"UnBlurApp_{current_datetime}.png"
             destination_path = os.path.join(output_directory, new_filename)
-            getPredict = f"http://{IpAddress}:{Port}/predict/{new_filename}"
+
             # Move the file from the source location to the output directory with the new name
             shutil.move(result, destination_path)
 
-            return jsonify({'result_image_path': getPredict})
+            # Upload the image to Firebase Storage
+            bucket = storage.bucket()
+            blob = bucket.blob(new_filename)
+            blob.upload_from_filename(destination_path)
+
+            # Get the URL of the uploaded image
+            image_url = blob.public_url
+
+            # Return the JSON with the image URL
+            return jsonify({'result_image_path': image_url})
         else:
             return jsonify({'error': 'Missing parameters'})
     else:
@@ -61,13 +76,18 @@ def predict():
 def get_generated_image(filename):
     # Construct the path to the image based on the provided filename
     image_path = os.path.join(output_directory, filename)
-    
+
     # Check if the file exists
-    if os.path.exists(image_path):
-        # Send the file as a response
-        return send_file(image_path, mimetype='image/png')
-    else:
-        return jsonify({'error': 'Image not found'})
+    if not os.path.exists(image_path):
+        return jsonify({'error': 'Image not found'}), 404
+
+    # Read the image file
+    with open(image_path, 'rb') as image_file:
+        # Encode the image in base64
+        encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
+        print(encoded_image)
+    # Create a JSON response
+    return jsonify(encoded_image)
 
 if __name__ == '__main__':
     app.run(host=IpAddress, port=Port)
