@@ -10,8 +10,8 @@ from firebase_admin import credentials, storage
 app = Flask(__name__)
 
 # Initialize Firebase
-cred = credentials.Certificate("path/to/your/firebase-credentials.json")
-firebase_admin.initialize_app(cred, {'storageBucket': 'your-firebase-storage-bucket'})
+cred = credentials.Certificate("bening-app-firebase-adminsdk-42cyk-19c0554d22.json")
+firebase_admin.initialize_app(cred, {'storageBucket': 'bening-app.appspot.com'})
 
 IpAddress = "192.168.2.51"
 Port = 8080
