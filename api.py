@@ -1,4 +1,5 @@
 import base64
+import urllib.parse
 from flask import Flask, request, jsonify, send_file
 from gradio_client import Client
 import os
@@ -13,11 +14,11 @@ app = Flask(__name__)
 cred = credentials.Certificate("bening-app-firebase-adminsdk-42cyk-19c0554d22.json")
 firebase_admin.initialize_app(cred, {'storageBucket': 'bening-app.appspot.com'})
 
-IpAddress = "192.168.2.51"
+IpAddress = "192.168.2.54"
 Port = 8080
 # Define the output directory in your project
 output_directory = "output"
-
+firebase_folder = "images"  # Specify the folder name you want in Firebase Storage
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -56,21 +57,29 @@ def predict():
             # Move the file from the source location to the output directory with the new name
             shutil.move(result, destination_path)
 
-            # Upload the image to Firebase Storage
+            # Upload the image to Firebase Storage in the "images" folder
             bucket = storage.bucket()
-            blob = bucket.blob(new_filename)
-            blob.upload_from_filename(destination_path)
+            blob = bucket.blob(firebase_folder + "/" + new_filename)
+            
+            try:
+                blob.upload_from_filename(destination_path)
+            except Exception as e:
+                return jsonify({'error': f'Firebase upload failed: {str(e)}'}), 500
 
-            # Get the URL of the uploaded image
-            image_url = blob.public_url
+            # Get the URL of the uploaded image from Firebase Storage
+            bucket_name = blob.bucket.name
+            blob_name = blob.name
+            safe_blob_name = urllib.parse.quote(blob_name, safe='')
+            image_url = f"https://firebasestorage.googleapis.com/v0/b/{bucket_name}/o/{safe_blob_name}?alt=media"
+
+            print(new_filename)
 
             # Return the JSON with the image URL
-            return jsonify({'result_image_path': image_url})
+            return jsonify({'result_image_path': new_filename})
         else:
             return jsonify({'error': 'Missing parameters'})
     else:
         return jsonify({'error': 'Missing JSON payload or query parameters'})
-
 
 @app.route('/predict/<filename>', methods=['GET'])
 def get_generated_image(filename):
@@ -85,9 +94,9 @@ def get_generated_image(filename):
     with open(image_path, 'rb') as image_file:
         # Encode the image in base64
         encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
-        print(encoded_image)
-    # Create a JSON response
-    return jsonify(encoded_image)
+
+    # Create a JSON response with appropriate Content-Type header
+    return jsonify({'encoded_image': encoded_image}), 200, {'Content-Type': 'application/json'}
 
 if __name__ == '__main__':
     app.run(host=IpAddress, port=Port)
