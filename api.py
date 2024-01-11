@@ -14,7 +14,7 @@ app = Flask(__name__)
 cred = credentials.Certificate("bening-app-firebase-adminsdk-42cyk-19c0554d22.json")
 firebase_admin.initialize_app(cred, {'storageBucket': 'bening-app.appspot.com', 'databaseURL': 'https://bening-app-default-rtdb.asia-southeast1.firebasedatabase.app'})
 
-IpAddress = "192.168.2.62"
+IpAddress = "192.168.2.50"
 Port = 8080
 
 # Define the output directory in your project
