@@ -6,19 +6,21 @@ import os
 import shutil
 from datetime import datetime
 import firebase_admin
-from firebase_admin import credentials, storage
+from firebase_admin import credentials, storage, db
 
 app = Flask(__name__)
 
 # Initialize Firebase
 cred = credentials.Certificate("bening-app-firebase-adminsdk-42cyk-19c0554d22.json")
-firebase_admin.initialize_app(cred, {'storageBucket': 'bening-app.appspot.com'})
+firebase_admin.initialize_app(cred, {'storageBucket': 'bening-app.appspot.com', 'databaseURL': 'https://bening-app-default-rtdb.asia-southeast1.firebasedatabase.app'})
 
-IpAddress = "192.168.2.54"
+IpAddress = "192.168.2.62"
 Port = 8080
+
 # Define the output directory in your project
 output_directory = "output"
-firebase_folder = "images"  # Specify the folder name you want in Firebase Storage
+
+firebase_folder = "resultImages"  # Specify the folder name you want in Firebase Storage
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -28,6 +30,8 @@ def predict():
     if data:
         # Parse parameters from query parameters
         image_path = request.args.get('image', data.get('image', None))
+        uid_user = request.args.get('uid', data.get('uid', None))
+        image_Id = request.args.get('image_id', data.get('image_id', None))
         background_enhance = request.args.get('background_enhance', data.get('background_enhance', None))
         face_upsample = request.args.get('face_upsample', data.get('face_upsample', None))
         rescaling_factor = request.args.get('rescaling_factor', data.get('rescaling_factor', None))
@@ -71,7 +75,14 @@ def predict():
             blob_name = blob.name
             safe_blob_name = urllib.parse.quote(blob_name, safe='')
             image_url = f"https://firebasestorage.googleapis.com/v0/b/{bucket_name}/o/{safe_blob_name}?alt=media"
-
+            # Write image_path and image_url to Firebase Realtime Database
+            ref = db.reference('/')
+            # Get a reference to the 'users/uid/firstImages' node
+            user_ref = ref.child(f'users/{uid_user}/resultImages')
+        
+            # Set the generated filename under the image ID
+            user_ref.child(image_Id).set(new_filename)
+            
             print(new_filename)
 
             # Return the JSON with the image URL
@@ -97,6 +108,10 @@ def get_generated_image(filename):
 
     # Create a JSON response with appropriate Content-Type header
     return jsonify({'encoded_image': encoded_image}), 200, {'Content-Type': 'application/json'}
+
+@app.route('/status', methods=['GET'])
+def get_server_status():
+    return jsonify({'status': 'Server is up and running'}), 200
 
 if __name__ == '__main__':
     app.run(host=IpAddress, port=Port)
