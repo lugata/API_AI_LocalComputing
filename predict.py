@@ -168,10 +168,10 @@ title = "Unblur App"
 iface = gr.Interface(
     inference, [
     gr.Image(type="filepath", label="Input"),
-    gr.Checkbox(label="Background_Enhance"),
-    gr.Checkbox(label="Face_Upsample"),
-    gr.Number(label="Rescaling_Factor (up to 4)"),
-    gr.Slider(0, 1, value=0.7, step=0.01, label='Fidelity (0 for better quality, 1 for better identity)')
+    gr.Checkbox(label="Background_Enhance", value=True, visible=False,),
+    gr.Checkbox(label="Face_Upsample", value=True, visible=False,),
+    gr.Number(label="Rescaling_Factor (up to 4)", value=2, min_value=1, max_value=4, step=1, visible=False,),
+    gr.Slider(0, 1, value=0.4, step=0.01, label='Fidelity (0 for better quality, 1 for better identity)', visible=False,)
     ], [
     gr.Image(type="numpy", label="Output"),
     ],
