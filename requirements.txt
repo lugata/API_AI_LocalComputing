@@ -22,3 +22,4 @@ gradio_client
 torch
 torchvision
 PIL
+firebase_admin
