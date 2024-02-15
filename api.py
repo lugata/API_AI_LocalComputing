@@ -14,9 +14,6 @@ app = Flask(__name__)
 cred = credentials.Certificate("bening-app-firebase-adminsdk-42cyk-19c0554d22.json")
 firebase_admin.initialize_app(cred, {'storageBucket': 'bening-app.appspot.com', 'databaseURL': 'https://bening-app-default-rtdb.asia-southeast1.firebasedatabase.app'})
 
-IpAddress = "192.168.2.50"
-Port = 8080
-
 # Define the output directory in your project
 output_directory = "output"
 
@@ -55,7 +52,7 @@ def predict():
 
             # Generate a new filename based on the current date and time
             current_datetime = datetime.now().strftime("%Y%m%d%H%M%S")
-            new_filename = f"UnBlurApp_{current_datetime}.png"
+            new_filename = f"{current_datetime}.png"
             destination_path = os.path.join(output_directory, new_filename)
 
             # Move the file from the source location to the output directory with the new name
@@ -111,7 +108,8 @@ def get_generated_image(filename):
 
 @app.route('/status', methods=['GET'])
 def get_server_status():
+    print('Server is up and running')
     return jsonify({'status': 'Server is up and running'}), 200
 
 if __name__ == '__main__':
-    app.run(host=IpAddress, port=Port)
+    app.run(host='0.0.0.0')
