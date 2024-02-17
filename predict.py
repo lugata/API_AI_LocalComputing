@@ -29,6 +29,7 @@ def set_realesrgan():
         num_grow_ch=32,
         scale=2,
     )
+    
     upsampler = RealESRGANer(
         scale=2,
         model_path="weights/realesrgan/RealESRGAN_x2plus.pth",
@@ -156,14 +157,23 @@ def inference(image, background_enhance, face_upsample, upscale, codeformer_fide
                 restored_img = face_helper.paste_faces_to_input_image(
                     upsample_img=bg_img, draw_box=draw_box
                 )
+        
+        # Save Faces
+        for idx, face in enumerate(face_helper.cropped_faces):
+            imwrite(face, f"output/face_{idx}.png")
+        
+        # Save Restored Faces
+        for idx, face in enumerate(face_helper.restored_faces):
+            imwrite(face, f"output/restored_face_{idx}.png")
 
         restored_img = cv2.cvtColor(restored_img, cv2.COLOR_BGR2RGB)
         return restored_img
+    
     except Exception as error:
         print('Global exception', error)
         return None, None
 
-title = "Unblur App"
+title = "Bening App"
 # Gradio Interface
 iface = gr.Interface(
     inference, [
