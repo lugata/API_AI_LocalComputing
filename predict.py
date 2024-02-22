@@ -136,6 +136,8 @@ def inference(image, background_enhance, face_upsample, upscale, codeformer_fide
 
             restored_face = restored_face.astype("uint8")
             face_helper.add_restored_face(restored_face)
+            imwrite(cropped_face, f"output/face_{idx}.png")
+            imwrite(cropped_face, f"output/result_face_{idx}.png")
 
         # paste_back
         if not has_aligned:
@@ -157,14 +159,6 @@ def inference(image, background_enhance, face_upsample, upscale, codeformer_fide
                 restored_img = face_helper.paste_faces_to_input_image(
                     upsample_img=bg_img, draw_box=draw_box
                 )
-        
-        # Save Faces
-        for idx, face in enumerate(face_helper.cropped_faces):
-            imwrite(face, f"output/face_{idx}.png")
-        
-        # Save Restored Faces
-        for idx, face in enumerate(face_helper.restored_faces):
-            imwrite(face, f"output/restored_face_{idx}.png")
 
         restored_img = cv2.cvtColor(restored_img, cv2.COLOR_BGR2RGB)
         return restored_img
